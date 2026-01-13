@@ -1,0 +1,4 @@
+[2026-01-13 20:46:07.347330] ALERT SENT TO jflajolet@sbe-ltd.co.uk: FAILED DELETION ATTEMPT
+User: master@example.com
+Target User ID: 69660a47b737e48c87d1526d
+IP: 127.0.0.1

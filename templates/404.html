@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}Page Not Found - SBE Blacklist Cordon{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="mb-0"><i class="bi bi-exclamation-triangle me-2"></i>Page Not Found (404)</h3>
+            </div>
+            <div class="card-body text-center py-5">
+                <div class="mb-4">
+                    <i class="bi bi-compass" style="font-size: 5rem; color: #6c757d;"></i>
+                </div>
+
+                <h2 class="mb-4">Oops! The page you're looking for doesn't exist.</h2>
+
+                <p class="lead mb-4">
+                    It seems you've navigated to a page that doesn't exist or has been moved.
+                    Please check the URL and try again.
+                </p>
+
+                <div class="alert alert-info text-start mb-4">
+                    <h5><i class="bi bi-info-circle me-2"></i>Possible reasons:</h5>
+                    <ul class="mb-0">
+                        <li>The page may have been moved or deleted</li>
+                        <li>You might have typed the URL incorrectly</li>
+                        <li>Your session may have expired</li>
+                        <li>You don't have permission to access this page</li>
+                    </ul>
+                </div>
+
+                <div class="d-grid gap-2 d-md-flex justify-content-center mt-4">
+                    {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('index') }}" class="btn btn-primary btn-lg">
+                        <i class="bi bi-house-door me-2"></i>Return to Dashboard
+                    </a>
+                    {% else %}
+                    <a href="{{ url_for('login') }}" class="btn btn-primary btn-lg">
+                        <i class="bi bi-box-arrow-in-right me-2"></i>Go to Login
+                    </a>
+                    {% endif %}
+
+                    <a href="javascript:history.back()" class="btn btn-outline-secondary btn-lg">
+                        <i class="bi bi-arrow-left me-2"></i>Go Back
+                    </a>
+                </div>
+
+                <div class="mt-5 pt-4 border-top">
+                    <small class="text-muted">
+                        If you believe this is an error, please contact the system administrator at
+                        <strong>tech_support@sbe-ltd.co.uk</strong>
+                    </small>
+                    <br>
+                    <small class="text-muted">
+                        Error Code: 404 | Requested URL: {{ request.path }}
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Log 404 error for analytics
+    document.addEventListener('DOMContentLoaded', function () {
+        console.warn('404 Error: User attempted to access non-existent page:', window.location.pathname);
+
+        // Optional: Send error to server for logging
+        // fetch('/api/log-error', {
+        //     method: 'POST',
+        //     headers: {'Content-Type': 'application/json'},
+        //     body: JSON.stringify({
+        //         error: '404',
+        //         path: window.location.pathname,
+        //         timestamp: new Date().toISOString()
+        //     })
+        // });
+    });
+</script>
+{% endblock %}

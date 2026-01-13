@@ -1,0 +1,94 @@
+{% extends "base.html" %} {% block content %}
+<div class="container mt-4" style="max-width: 900px">
+  <div class="row">
+    <div class="col-md-8 offset-md-2">
+      <div class="card shadow">
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">
+            <i class="fas fa-search me-2"></i>IMEI Blacklist Check
+          </h5>
+          <span class="badge bg-secondary">Session active</span>
+        </div>
+        <div class="card-body">
+          {% if error %}
+          <div class="alert alert-danger">{{ error }}</div>
+          {% endif %}
+
+          <form method="POST" action="{{ url_for('index') }}">
+            <div class="mb-3">
+              <label for="imei" class="form-label fw-bold">Enter IMEI</label>
+              <span class="text-danger d-block mb-1 small">
+                <i class="fas fa-exclamation-triangle"></i> IMEI must belong to
+                SBE WIP & All checks are recorded!
+              </span>
+              <input type="text" name="imei" id="imei" class="form-control form-control-lg"
+                placeholder="15-digit IMEI number" required maxlength="15" />
+            </div>
+            <button type="submit" class="btn btn-primary btn-lg w-100">
+              Check IMEI Status
+            </button>
+          </form>
+
+          {% if results %}
+          <div
+            class="mt-4 p-3 border rounded text-center {{ 'bg-danger-subtle border-danger' if results.is_bad else 'bg-success-subtle border-success' }}">
+            <h4 class="{{ 'text-danger' if results.is_bad else 'text-success' }}">
+              <i class="fas {{ 'fa-ban' if results.is_bad else 'fa-check-circle' }} me-2"></i>
+              {{ "BLACKLISTED" if results.is_bad else "CLEAN" }}
+            </h4>
+            <p class="mb-1">IMEI: <strong>{{ results.imei }}</strong></p>
+
+            {# Show Reason and Date only if blacklisted #} {% if results.is_bad
+            %}
+            <p class="mb-1">
+              Reason: <strong>{{ results.reason_text }}</strong>
+            </p>
+            {% if results.blacklist_date %}
+            <p class="mb-0 small text-muted">
+              Blacklisted Date: {{ results.blacklist_date }}
+            </p>
+            {% endif %} {% endif %}
+          </div>
+          {% endif %}
+        </div>
+        <div class="card-footer text-muted d-flex justify-content-between">
+          <span>Usage today:
+            <strong>{{ usage }} / {{ limit if limit else '∞' }}</strong></span>
+          <a href="{{ url_for('logout') }}" class="text-danger text-decoration-none small">Logout</a>
+        </div>
+      </div>
+
+      <div class="mt-5">
+        <h4><i class="fas fa-history me-2"></i>Recent Checks</h4>
+        <div class="list-group shadow-sm">
+          {% for h in history %}
+          <div class="list-group-item d-flex justify-content-between align-items-center">
+            <div>
+              <strong>{{ h.imei }}</strong>
+              <div class="small text-muted">
+                {{ h.timestamp.strftime("%Y-%m-%d %H:%M") }} {# Show reason in
+                history if it exists #} {% if h.is_bad %} |
+                <span class="text-danger">Reason: {{ h.reason_text or h.reason }}</span>
+                {% endif %}
+              </div>
+              {% if h.blacklist_date %}
+              <div class="text-muted" style="font-size: 0.75rem">
+                Blocked: {{ h.blacklist_date }}
+              </div>
+              {% endif %}
+            </div>
+            <span class="badge {{ 'bg-danger' if h.is_bad else 'bg-success' }}">
+              {{ "Blacklisted" if h.is_bad else "Clean" }}
+            </span>
+          </div>
+          {% else %}
+          <div class="list-group-item text-center text-muted">
+            No recent checks found.
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

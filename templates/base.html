@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <title>Blacklist IMEI App</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+  <!-- SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+
+<body>
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+    <div class="container-fluid d-flex justify-content-between align-items-center position-relative"
+      style="min-height: 80px">
+      <div class="d-none d-lg-block" style="width: 150px"></div>
+
+      <div class="brand-absolute-center d-flex align-items-center justify-content-center">
+        <div class="side-text-zoom text-end pe-3" style="width: 200px; white-space: normal">
+          <small>© PROPERTY OF SBE-CORDON GROUP – USE THIS WEBSITE SOLELY FOR SBE
+            DAILY ACTIVITIES!</small>
+        </div>
+
+        <a class="navbar-brand fw-bold d-flex align-items-center m-0" href="{{ url_for('index') }}">
+          <span class="me-2" style="font-size: 1.25rem">IMEI Blacklist CHECK SBE-CORDON GROUP</span>
+          <img src="{{ url_for('static', filename='images/LogoSBECordon.png') }}" alt="Logo" class="logo-img" />
+        </a>
+
+        <div class="side-text-zoom text-start ps-3" style="width: 110px; white-space: normal">
+          <small>Powered by<br />SBE-Cordon Group</small>
+        </div>
+      </div>
+
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto align-items-center">
+          {% if current_user.is_authenticated %}
+          <li class="nav-item me-3">
+            <div class="d-flex flex-column align-items-end text-light" style="line-height: 1.1">
+              <span style="
+                    font-size: 0.65rem;
+                    opacity: 0.7;
+                    text-transform: uppercase;
+                    font-weight: bold;
+                  ">Logged in as:</span>
+              <span class="small">
+                <strong>{{ current_user.email }}</strong>
+                <span class="badge bg-secondary ms-1" style="font-size: 0.6rem">{{ current_user.role }}</span>
+              </span>
+            </div>
+          </li>
+
+          {% if current_user.role in ["master", "admin"] %}
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('admin') }}">Admin</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('global_history') }}">History</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('index') }}">Blacklist<br />Check</a>
+          </li>
+          {% endif %}
+
+          <li class="nav-item">
+            <a class="btn btn-outline-danger btn-sm ms-lg-2" href="{{ url_for('logout') }}">Logout</a>
+          </li>
+          {% else %}
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('login') }}">Login</a>
+          </li>
+          {% endif %}
+        </ul>
+      </div>
+
+      <button class="navbar-toggler ms-2" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Flash messages -->
+  <div class="container mt-3">
+    {% with messages = get_flashed_messages(with_categories=true) %} {% if
+    messages %} {% for category, message in messages %}
+    <div class="alert alert-{{ category }} alert-dismissible fade show shadow-sm d-flex align-items-center"
+      role="alert">
+      {% if category == 'danger' %}
+      <i class="fas fa-exclamation-triangle me-2"></i>
+      {% elif category == 'success' %}
+      <i class="fas fa-check-circle me-2"></i>
+      {% else %}
+      <i class="fas fa-info-circle me-2"></i>
+      {% endif %}
+      <div>{{ message }}</div>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %} {% endif %} {% endwith %}
+  </div>
+
+  <!-- Main container -->
+  <div class="container">
+    <!-- Page content -->
+    {% block content %}{% endblock %}
+  </div>
+
+  <!-- Bootstrap JS (with Popper) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Optional JS -->
+  <script>
+    function confirmRoleChange(username, oldRole, selectId) {
+      const select = document.getElementById(selectId);
+      const newRole = select.value;
+
+      if (oldRole === newRole) return false; // No change
+
+      const roles = ["tech", "admin", "master"];
+      const direction =
+        roles.indexOf(newRole) > roles.indexOf(oldRole)
+          ? "UPGRADE"
+          : "DOWNGRADE";
+
+      return confirm(
+        `Are you sure you want to ${direction} ${username} from ${oldRole.toUpperCase()} to ${newRole.toUpperCase()}?`
+      );
+    }
+
+    // Flash alert fade-out
+    document.addEventListener("DOMContentLoaded", function () {
+      const alerts = document.querySelectorAll(".alert");
+
+      alerts.forEach(function (alert) {
+        setTimeout(function () {
+          alert.style.opacity = "0";
+          setTimeout(() => alert.remove(), 500);
+        }, 5000);
+      });
+    });
+  </script>
+</body>
+
+</html>

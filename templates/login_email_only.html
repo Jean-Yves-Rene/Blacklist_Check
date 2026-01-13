@@ -1,0 +1,75 @@
+{% extends "base.html" %} {% block content %}
+
+<style>
+  .spinner {
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    border-top: 2px solid #fff;
+    border-radius: 50%;
+    display: inline-block;
+    animation: spin 0.8s linear infinite;
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+</style>
+
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 70vh">
+  <div class="card shadow-lg border-0" style="width: 100%; max-width: 400px">
+    <div class="card-header bg-primary text-white text-center py-3">
+      <h4 class="mb-0">
+        <i class="fas fa-shield-alt me-2"></i>IMEI Blacklist SBE-CORDON GROUP
+      </h4>
+    </div>
+
+    <div class="card-body p-4">
+      <p class="text-muted text-center small mb-4">
+        Enter your registered SBE email address. We will send you a 6-digit
+        secure access code.
+      </p>
+
+      <form method="POST" onsubmit="showSpinner()">
+        <div class="mb-3">
+          <input type="email" id="email" name="email" class="form-control" placeholder="Email" required />
+        </div>
+
+        <button type="submit" id="sendBtn"
+          class="btn btn-primary w-100 d-flex justify-content-center align-items-center">
+          <span id="btnText">Send access code</span>
+          <span id="spinner" class="spinner" hidden></span>
+        </button>
+      </form>
+    </div>
+
+    <div class="card-footer bg-light text-center py-3">
+      <small class="text-muted">Need access? Contact tech_support@sbe-ltd.co.uk.</small>
+    </div>
+  </div>
+</div>
+
+<script>
+  function showSpinner() {
+    const btn = document.getElementById("sendBtn");
+    const spinner = document.getElementById("spinner");
+    const text = document.getElementById("btnText");
+
+    btn.disabled = true;
+    spinner.hidden = false;
+    text.textContent = "Please wait...";
+  }
+
+  window.onload = () => {
+    setTimeout(() => {
+      const emailInput = document.getElementById("email");
+      if (emailInput) emailInput.value = "";
+    }, 100);
+  };
+</script>
+
+{% endblock %}

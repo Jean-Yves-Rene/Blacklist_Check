@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}Server Error - SBE Blacklist Cordon{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card">
+            <div class="card-header bg-danger text-white">
+                <h3 class="mb-0"><i class="bi bi-exclamation-octagon-fill me-2"></i>Server Error (500)</h3>
+            </div>
+            <div class="card-body text-center py-5">
+                <div class="mb-4">
+                    <i class="bi bi-bug-fill" style="font-size: 5rem; color: #dc3545;"></i>
+                </div>
+
+                <h2 class="mb-4">Something went wrong on our end</h2>
+
+                <p class="lead mb-4">
+                    We're experiencing technical difficulties. Our team has been notified
+                    and is working to fix the issue.
+                </p>
+
+                <div class="alert alert-warning text-start mb-4">
+                    <h5><i class="bi bi-lightbulb me-2"></i>What you can do:</h5>
+                    <ul class="mb-0">
+                        <li>Try refreshing the page in a few minutes</li>
+                        <li>Clear your browser cache and cookies</li>
+                        <li>Check if other parts of the system are working</li>
+                        <li>Contact support if the problem persists</li>
+                    </ul>
+                </div>
+
+                <div class="d-grid gap-2 d-md-flex justify-content-center mt-4">
+                    <a href="{{ url_for('index') }}" class="btn btn-primary btn-lg">
+                        <i class="bi bi-house-door me-2"></i>Return to Dashboard
+                    </a>
+
+                    <button onclick="location.reload()" class="btn btn-outline-primary btn-lg">
+                        <i class="bi bi-arrow-clockwise me-2"></i>Refresh Page
+                    </button>
+                </div>
+
+                <div class="mt-5 pt-4 border-top">
+                    <small class="text-muted">
+                        For immediate assistance, please contact:
+                        <strong>tech_support@sbe-ltd.co.uk</strong>
+                    </small>
+                    <br>
+                    <small class="text-muted">
+                        Error Code: 500 | Incident ID: {{ error_id if error_id else 'N/A' }}
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-history me-2"></i>Security Audit Log</h2>
+        <a href="{{ url_for('admin') }}" class="btn btn-secondary">Back to Admin</a>
+    </div>
+
+    <!-- Search Input -->
+    <input type="text" id="auditSearch" class="form-control mb-3" placeholder="Search by email, event, IP...">
+
+    <div class="card shadow-sm">
+        <div class="table-responsive">
+            <form method="get" class="row g-2 mb-3">
+                <div class="col-md-3">
+                    <input type="text" name="performed_by" class="form-control" placeholder="Performed by email"
+                        value="{{ filters.performed_by }}">
+                </div>
+            
+                <div class="col-md-3">
+                    <input type="text" name="target_email" class="form-control" placeholder="Target user email"
+                        value="{{ filters.target_email }}">
+                </div>
+            
+                <div class="col-md-3">
+                    <select name="event" class="form-select">
+                        <option value="">All Events</option>
+                        {% for e in events %}
+                        <option value="{{ e }}" {% if filters.event==e %}selected{% endif %}>
+                            {{ e }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            
+                <div class="col-md-3 d-flex gap-2">
+                    <button class="btn btn-primary w-100">Filter</button>
+            
+                    <a href="{{ url_for('export_audit_logs', **filters) }}" class="btn btn-outline-success w-100">
+                        Export CSV
+                    </a>
+                </div>
+            </form>
+
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Timestamp (UTC)</th>
+                        <th>Performed By</th>
+                        <th>Event</th>
+                        <th>Target User</th>
+                        <th>Change Details</th>
+                        <th>IP Address</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in logs %}
+                    <tr>
+                        <td><small>{{ log.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</small></td>
+                        <td><strong>{{ log.performed_by }}</strong></td>
+
+                        <td>
+                            {% if log.event == "PIN_REQUESTED" %}
+                            <span class="badge bg-info">PIN Requested</span>
+                            {% elif log.event == "ROLE_UPDATE" %}
+                            <span class="badge bg-success">Role Updated</span>
+                            {% elif "UNAUTHORIZED" in log.event %}
+                            <span class="badge bg-danger">Security Alert</span>
+                            {% else %}
+                            <span class="badge bg-secondary">{{ log.event }}</span>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if log.get("target") and log["target"].get("email") %}
+                            {{ log["target"]["email"] }}
+                            {% else %}
+                            -
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if log.get("details") %}
+                            <span class="text-muted">{{ log["details"].get("old_role", "-") }}</span>
+                            →
+                            <span class="fw-bold text-success">{{ log["details"].get("new_role", "-") }}</span>
+                            {% else %}
+                            -
+                            {% endif %}
+                        </td>
+
+                        <td><small class="text-muted">{{ log.ip_address }}</small></td>
+                    </tr>
+
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Search Filter Script -->
+<script>
+    document.getElementById("auditSearch").addEventListener("keyup", function () {
+        let value = this.value.toLowerCase();
+        let rows = document.querySelectorAll("tbody tr");
+
+        rows.forEach(row => {
+            row.style.display = row.textContent.toLowerCase().includes(value)
+                ? ""
+                : "none";
+        });
+    });
+</script>
+{% endblock %}

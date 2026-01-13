@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}Verify Code{% endblock %}
+{% block
+content %}
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 70vh">
+  <div class="card shadow-lg border-0" style="width: 100%; max-width: 450px">
+    <div class="card-header bg-primary text-white text-center py-3">
+      <h4 class="mb-0">
+        <i class="fas fa-key me-2"></i>Verify Access
+      </h4>
+    </div>
+    <div class="card-body p-4 text-center">
+      <p class="text-muted">
+        A 6-digit secure code was sent to:
+        <br />
+        <strong class="text-dark">{{ email }}</strong>
+      </p>
+      {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if
+      messages %}
+      {% for category, message in messages %}
+      <div class="alert alert-{{ category }} small py-2">{{ message }}</div>
+      {% endfor %}
+      {% endif %}
+      {% endwith %}
+      <form method="POST" autocomplete="off">
+        <div class="mb-4">
+          <label for="pin" class="form-label fw-bold">Enter 6-Digit Code</label>
+          <input type="text" name="pin" id="pin" class="form-control form-control-lg text-center" style="letter-spacing: 8px;
+                          font-size: 2rem;
+                          font-weight: bold" placeholder="000000" pattern="\d{6}" maxlength="6" inputmode="numeric"
+            required autofocus />
+          <div class="form-text mt-2 text-danger small">
+            <i class="fas fa-clock me-1"></i> This code expires in 10 minutes.
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary btn-lg w-100">Verify & Login</button>
+      </form>
+    </div>
+    <div class="mt-4 text-center">
+      <p class="text-muted">Didn't receive a code?</p>
+      <button id="resendBtn" class="btn btn-outline-secondary btn-sm" {% if time_left>
+        0 %} disabled {% endif %}>
+        {% if time_left > 0 %}
+        Resend available in
+        <span id="timer">{{ time_left }}</span>s
+        {% else %}
+        Resend Code
+        {% endif
+        %}
+      </button>
+    </div>
+  </div>
+</div>
+<script>
+  let timeLeft = 60;
+  const timerDisplay = document.getElementById("timer");
+  const resendBtn = document.getElementById("resendBtn");
+
+  const countdown = setInterval(() => {
+    timeLeft--;
+    timerDisplay.textContent = timeLeft;
+
+    if (timeLeft <= 0) {
+      clearInterval(countdown);
+      resendBtn.disabled = false;
+      resendBtn.innerHTML = "Resend Code";
+      resendBtn.onclick = () => {
+        window.location.href = "{{ url_for('login') }}";
+      };
+    }
+  }, 1000);
+</script>
+{% endblock %}
