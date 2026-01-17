@@ -35,6 +35,8 @@ import logging
 from logging.handlers import RotatingFileHandler
 import traceback
 import sys
+# Quick fix for empty roles in MongoDB
+from bson.objectid import ObjectId
 
 load_dotenv()  # <-- this reads your .env file
 
@@ -246,7 +248,19 @@ def create_login_pin(email, request):
 
     if email not in PIN_TEST_USERS:
         send_pin_email(email, pin)
+def fix_empty_roles():
+    # Find users where role is missing, null, or an empty string
+    result = db.users.update_many(
+        {"$or": [
+            {"role": {"$exists": False}},
+            {"role": None},
+            {"role": ""}
+        ]},
+        {"$set": {"role": "tech"}}
+    )
+    print(f"Updated {result.modified_count} users to 'tech' role.")
 
+# fix_empty_roles()
 
 def _send_pin_email_smtp(user_email, pin):
     """Sends PIN via Mailjet API instead of SMTP to bypass Windows timeouts"""
@@ -462,6 +476,17 @@ def verify_pin():
         flash(f"Invalid code. {attempts_left} attempts left.", "warning")
 
     return render_template("verify_pin.html", email=email, time_left=time_left)
+
+# MongoDB command to add 'tech' role to any user missing it
+db.users.update_many(
+    { "role": { "$exists": False } }, 
+    { "$set": { "role": "tech" } }
+)
+
+db.users.update_many(
+    { "role": "" }, 
+    { "$set": { "role": "tech" } }
+)
 
 # ---------------- AUTH ROUTES ----------------
 @app.errorhandler(403)

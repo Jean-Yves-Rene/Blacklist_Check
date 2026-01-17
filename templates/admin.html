@@ -67,34 +67,53 @@
                         <small class="text-muted">{{ user.email }}</small>
                     </td>
                     <td>
+                        {# 1. Check for Master badge #}
                         {% if user.role == 'master' %}
                         <span class="badge badge-master mb-1"><i class="fas fa-crown me-1"></i>Master Account</span>
                         {% endif %}
+
                         <form id="roleForm-{{ user._id }}"
                             action="{{ url_for('update_role', user_id=user._id|string) }}" method="POST"
                             class="d-flex gap-2 align-items-center">
                             {{ role_form.hidden_tag() }}
 
-                            {% set can_edit = current_user.role == 'master' or (current_user.role == 'admin' and
-                            user.role == 'tech') %}
+                            {# --- REPAIR LOGIC --- #}
+                            {% set my_role = current_user.role|lower|trim %}
+
+                            {# If user.role is empty/missing, treat them as a 'tech' for safety #}
+                            {% set target_role = (user.role|lower|trim) if user.role else 'tech' %}
+                            {% set is_self = (user.email == current_user.email) %}
+
+                            {# Rule: Admin can edit if target is 'tech' or if target has NO role assigned #}
+                            {% if my_role == 'admin' and (target_role == 'tech' or target_role == '') %}
+                            {% set can_edit = True %}
+                            {# Rule: Master can edit anyone but themselves or other Masters #}
+                            {% elif my_role == 'master' and not is_self and target_role != 'master' %}
+                            {% set can_edit = True %}
+                            {% else %}
+                            {% set can_edit = False %}
+                            {% endif %}
 
                             <select name="role" class="form-select form-select-sm w-auto role-select" {% if not can_edit
                                 %}disabled{% endif %}>
 
-                                {# Always include all options to show correct selection #}
-                                <option value="tech" {% if user.role=='tech' %}selected{% endif %}>Tech</option>
-                                <option value="admin" {% if user.role=='admin' %}selected{% endif %}>Admin</option>
-                                <option value="master" {% if user.role=='master' %}selected{% endif %}>Master</option>
+                                <option value="tech" {% if target_role=='tech' or target_role=='' %}selected{% endif %}>
+                                    Tech</option>
+                                <option value="admin" {% if target_role=='admin' %}selected{% endif %}>Admin</option>
+
+                                {% if my_role == 'master' %}
+                                <option value="master" {% if target_role=='master' %}selected{% endif %}>Master</option>
+                                {% endif %}
                             </select>
 
                             {% if can_edit %}
                             <button type="submit" class="btn btn-sm btn-outline-primary">Update Role</button>
                             {% else %}
                             <span class="badge 
-                                {% if user.role == 'master' %}bg-danger
-                                {% elif user.role == 'admin' %}bg-warning text-dark
-                                {% else %}bg-primary{% endif %}">
-                                {{ user.role|upper }} (View Only)
+                                    {% if target_role == 'master' %}bg-danger
+                                    {% elif target_role == 'admin' %}bg-warning text-dark
+                                    {% else %}bg-primary{% endif %}">
+                                {{ (user.role|upper) if user.role else 'NO ROLE' }} (View Only)
                             </span>
                             {% endif %}
                         </form>
